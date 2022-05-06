@@ -1,0 +1,59 @@
+public static void GetUrl()
+        {
+            try
+            {
+                var yt = new YouTubeService(new BaseClientService.Initializer() { ApiKey = "AIzaSyCGaEx7pRJKFyNAFEbN3-E3a-3qwBqivlY" });
+                var channelsListRequest = yt.Channels.List("contentDetails");
+                //channelsListRequest.ForUsername = "Al92LORTFrKNvs3YOmi93g";
+                channelsListRequest.Id = "UCdvzM7DAz0Yb0WmNnUTAAUw";
+                //channelsListRequest.
+                var channelsListResponse = channelsListRequest.Execute();
+                int VideoCount = 1;
+
+                string OUT = "";
+                //System.IO.File.WriteAllText("..\\..\\IN\\" + strFileName + ".txt", strContentOut);
+                int MAX = 443;
+                string ChannelNam = "tvtn";
+                string chanelID = "UCdvzM7DAz0Yb0WmNnUTAAUw";
+                foreach (var channel in channelsListResponse.Items)
+                {
+                    var uploadsListId = channel.ContentDetails.RelatedPlaylists.Uploads;
+                    var nextPageToken = "";
+                    while (nextPageToken != null)
+                    {
+                        var playlistItemsListRequest = yt.PlaylistItems.List("snippet");
+                        playlistItemsListRequest.PlaylistId = uploadsListId;
+                        playlistItemsListRequest.MaxResults = 50;
+                        playlistItemsListRequest.PageToken = nextPageToken;
+                        // Retrieve the list of videos uploaded to the authenticated user's channel.  
+                        var playlistItemsListResponse = playlistItemsListRequest.Execute();
+                        foreach (var playlistItem in playlistItemsListResponse.Items)
+                        {
+
+                            // variables
+                            string VideoId = playlistItem.Snippet.ResourceId.VideoId;
+                            string Title = playlistItem.Snippet.Title;
+                            string Url = string.Format("https://www.youtube.com/watch?v={0}", VideoId);
+                            string Image = playlistItem.Snippet.Thumbnails.High.Url;
+
+                            OUT = OUT + (MAX - VideoCount) + "\r\n" + chanelID + "\r\n" + ChannelNam + "\r\n" + VideoId + "\r\n" + Url + "\r\n" + Title + "\r\n" + Image + "\r\n\r\n";
+                            //Console.WriteLine("Sl No={0}", VideoCount);
+                            //Console.Write("Video ID ={0} ", "https://www.youtube.com/embed/" + playlistItem.Snippet.ResourceId.VideoId);
+                            ////Console.Write("Video Title ={0} ", playlistItem.Snippet.Title);  
+                            ////Console.Write("Video Descriptions = {0}", playlistItem.Snippet.Description);  
+                            ////Console.WriteLine("Video ImageUrl ={0} ", playlistItem.Snippet.Thumbnails.High.Url);  
+                            ////Console.WriteLine("----------------------");  
+                            VideoCount++;
+                        }
+                        //OUT = OUT + "\r\n\r\n";
+                        nextPageToken = playlistItemsListResponse.NextPageToken;
+                    }
+                    //Console.ReadLine();
+                }
+                System.IO.File.WriteAllText("..\\..\\youtubeplaylist\\" + "playlist" + ".txt", OUT);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Some exception occured" + e);
+            }
+        }
